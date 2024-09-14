@@ -1,7 +1,6 @@
 const express = require('express')
 const cors = require('cors');
-//const commentsRouter = require('./routes/comments.js');
-//const usersRouter = require('./routes/users.js');
+const inventoriesRoutes = require('./routes/inventoriesRoutes');
 const app = express()
 const port = 3000
 
@@ -9,25 +8,18 @@ const port = 3000
 app.use(express.json()) 
 app.use(cors()); 
 app.use(express.static('public'))
-app.use((req, res, next) => {
-  console.log("Welcome to InStock!");
- 
-  next();
-})
 
-app.use((req, res, next) => {
-  console.log("Welcome to InStock!!!");
-  next();
-})
 
-// CORS middleware
+
+
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
 });
 
-//app.use('/comments', commentsRouter);
-//app.use('/users', usersRouter);
+
+// Routes 
+app.use('/inventories/:warehouse_id', inventoriesRoutes);
 
 
 app.listen(port, () => {
