@@ -1,5 +1,6 @@
 const Joi = require("joi");
-const { v4: uuidv4 } = require('uuid');
+const knex = require("knex")(require("../knexfile"));
+
 // {
 //     "warehouse_id": 1,
 //     "item_name": "Paper Towels",
@@ -14,16 +15,16 @@ const createNewInventory = async (req, res) => {
   try {
     // inventorySchema for req body validations
     const inventorySchema = Joi.object({
-      warehouse_id: Joi.required(),
+      warehouse_id: Joi.number().integer().strict().positive().required(),
       item_name: Joi.string().required(),
       description: Joi.string().required(),
       category: Joi.string().required(),
       status: Joi.string().valid("in stock", "out of stock").required(),
-      quantity: Joi.number().integer().positive().required(),
+      quantity: Joi.number().integer().strict().positive().required(),
     });
 
     const { error } = inventorySchema.validate(
-        //convert status from REQ BODY to lowerCase to pass Validation
+      //convert status from REQ BODY to lowerCase to pass Validation
       { ...req.body, status: req.body.status.toLowerCase() },
       {
         abortEarly: false,
@@ -36,23 +37,48 @@ const createNewInventory = async (req, res) => {
         message: error.details.map((detail) => detail.message).join(", "),
       });
     }
-
-    // Create a new inventory item when db is ready
+    // check if  warehouse_id all ready exist in warehouse
     const { warehouse_id, item_name, description, category, status, quantity } =
       req.body;
-    // check if  warehouse_id all ready exist in warehouse
-    // Duplicate Inventory for the Same Warehouse
 
-    // save into db
-    // const result = await knex("inventory").insert(
-    //   warehouse_id,
-    //   item_name,
-    //   description,
-    //   category,
-    //   status,
-    //   quantity
-    // );
-    res.json({ message: req.body });
+    const warehouseAllReadyExist = await knex("warehouses").where(
+      "id",
+      warehouse_id
+    );
+    if (warehouseAllReadyExist.length === 0)
+      return res.status(400).send({
+        message:
+          "The warehouse you're trying to add inventory to does not exist. Please add the warehouse first.",
+      });
+
+    // Create a new inventory item when db is ready
+    const createNewInventory = await knex("inventories")
+      .insert({
+        warehouse_id,
+        item_name,
+        description,
+        category,
+        status,
+        quantity,
+      });
+
+    if (createNewInventory.length === 0)
+      return res.status(500).send({
+        message:
+          "Unable to create new inventory at the moment. Please try again later.",
+      });
+
+    const [newInventoryId] = createNewInventory;
+    const newInventory = await knex("inventories")
+      .where({ id: newInventoryId })
+      .first();
+
+    res.status(201).json({
+      message: "Inventory created successfully",
+      data: newInventory,
+    });
+
+
   } catch (err) {
     res.status(400).send(`Error Creating  Inventory : ${err}`);
   }
