@@ -36,7 +36,15 @@ const updateWarehouseDetails = async (req, res) => {
       return res.status(404).json({ message: "Warehouse not found." });
     }
 
-    await knex("warehouses").where("id", warehouseId).update(req.body);
+    const updateCount = await knex("warehouses")
+      .where("id", warehouseId)
+      .update(req.body);
+
+    if (updateCount === 0) {
+      return res.status(500).json({
+        message: "Update failed: No changes made or warehouse not found.",
+      });
+    }
 
     const updatedWarehouse = await knex("warehouses")
       .where("id", warehouseId)
