@@ -1,27 +1,23 @@
-const express = require('express')
-const cors = require('cors');
-const inventoriesRoutes = require('./routes/inventoriesRoutes');
-const app = express()
-const port = 3000
+const express = require("express");
+const cors = require("cors");
+const inventoriesRoutes = require("./routes/inventoriesRoutes");
+const warehouseRoutes = require("./routes/warehouseRoutes");
+const app = express();
+const port = 3000;
 
 // Middleware
-app.use(express.json()) 
-app.use(cors()); 
-app.use(express.static('public'))
+app.use(express.json());
+app.use(cors());
+app.use(express.static("public"));
 
-
-
-
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
-
-// Routes 
-app.use('/inventories/:warehouse_id', inventoriesRoutes);
-
+// Routes
+app.use("/inventories/:warehouse_id", inventoriesRoutes);
+app.use("/warehouses/", warehouseRoutes);
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`)
-})
+  console.log(`Server running on port ${port}`);
+});
