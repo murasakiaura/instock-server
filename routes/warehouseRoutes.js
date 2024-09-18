@@ -9,4 +9,6 @@ router.put("/:id", updateWarehouseDetails);
 router.get('/', getAllWarehouses);
 router.get('/:id', getSingleWarehouse);
 
+
+
 module.exports = router;
