@@ -84,6 +84,19 @@ const createNewInventory = async (req, res) => {
   }
 };
 
+const getAllInventoryItems = async (req, res) => {
+  try {
+    const allInventoryItems = await knex("inventories");
+    if (allInventoryItems.length === 0) {
+      return res.status(200).json({ message: 'Currently, inventory is empty' });
+    }
+    res.status(200).json(allInventoryItems);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch all inventory items" });
+  }
+};
+
 module.exports = {
   createNewInventory,
+  getAllInventoryItems,
 };

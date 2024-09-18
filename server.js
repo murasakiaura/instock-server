@@ -17,6 +17,7 @@ app.get("/", (req, res) => {
 // Routes
 app.use("/inventories/:warehouse_id", inventoriesRoutes);
 app.use("/warehouses", warehouseRoutes);
+app.use("/inventories", inventoriesRoutes);
 
 
 app.listen(port, () => {
