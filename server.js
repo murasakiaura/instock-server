@@ -19,6 +19,7 @@ app.use("/inventories/:warehouse_id", inventoriesRoutes);
 app.use("/warehouses", warehouseRoutes);
 app.use("/warehouses/:warehouse_id", warehouseRoutes);
 
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });

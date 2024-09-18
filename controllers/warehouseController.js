@@ -61,6 +61,7 @@ const updateWarehouseDetails = async (req, res) => {
   }
 };
 
+
 // Get all Warehouses
 
 const getAllWarehouses = async (req, res) => {
