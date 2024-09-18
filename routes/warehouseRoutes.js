@@ -7,4 +7,6 @@ const {
 router.put("/:id", updateWarehouseDetails);
 router.get('/', getAllWarehouses);
 
+
+
 module.exports = router;

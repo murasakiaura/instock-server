@@ -61,6 +61,7 @@ const updateWarehouseDetails = async (req, res) => {
   }
 };
 
+
 const getAllWarehouses = async(req, res) => {
   try {
     const allWarehouses = await knex("warehouses");
@@ -77,5 +78,4 @@ module.exports = {
   updateWarehouseDetails,
   getAllWarehouses
 };
-
 

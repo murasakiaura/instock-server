@@ -18,6 +18,7 @@ app.get("/", (req, res) => {
 app.use("/inventories/:warehouse_id", inventoriesRoutes);
 app.use("/warehouses", warehouseRoutes);
 
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
