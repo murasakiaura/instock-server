@@ -61,6 +61,21 @@ const updateWarehouseDetails = async (req, res) => {
   }
 };
 
+
+const getAllWarehouses = async(req, res) => {
+  try {
+    const allWarehouses = await knex("warehouses");
+    if (allWarehouses.length === 0) {
+      return res.status(200).json({ message: 'No warehouses found' });
+    }
+    res.status(200).json(allWarehouses);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch warehouses' });
+  }
+}
+
 module.exports = {
   updateWarehouseDetails,
+  getAllWarehouses
 };
+
