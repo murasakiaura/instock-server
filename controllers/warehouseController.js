@@ -62,11 +62,10 @@ const updateWarehouseDetails = async (req, res) => {
 };
 
 
+
+
 // Get all Warehouses
-const getAllWarehouses = async (req, res) => {
-
-
-
+const getAllWarehouses = async(req, res) => {
   try {
     const allWarehouses = await knex("warehouses");
     if (allWarehouses.length === 0) {
@@ -80,6 +79,20 @@ const getAllWarehouses = async (req, res) => {
 
 // Get a single warehouse
 
+const getSingleWarehouse = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const warehouse = await knex("warehouses").where({ id }).first();
+    if (!warehouse) {
+      return res.status(404).json({ error: "Warehouse not found" });
+    }
+    res.status(200).json(warehouse);
+  } catch (error) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// Get a single warehouse
 const getSingleWarehouse = async (req, res) => {
   const { id } = req.params;
   try {
