@@ -62,19 +62,21 @@ const updateWarehouseDetails = async (req, res) => {
 };
 
 
-// Get all Warehouses
 
-const getAllWarehouses = async (req, res) => {
+// Get all Warehouses
+const getAllWarehouses = async(req, res) => {
   try {
     const allWarehouses = await knex("warehouses");
+    if (allWarehouses.length === 0) {
+      return res.status(200).json({ message: 'No warehouses found' });
+    }
     res.status(200).json(allWarehouses);
   } catch (error) {
-    res.status(500).json({ error: "Failed to fetch warehouses" });
+    res.status(500).json({ error: 'Failed to fetch warehouses' });
   }
-};
+}
 
 // Get a single warehouse
-
 const getSingleWarehouse = async (req, res) => {
   const { id } = req.params;
   try {
@@ -93,3 +95,4 @@ module.exports = {
   getAllWarehouses,
   getSingleWarehouse,
 };
+
