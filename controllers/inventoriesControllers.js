@@ -86,7 +86,13 @@ const updateInventoryByWarehouseId = async (req, res) => {
       status: Joi.string().valid("IN STOCK", "OUT OF STOCK").required(),
       quantity: Joi.number().integer().strict().required(),
     });
-    const { error } = inventorySchema.validate(req.body, { abortEarly: false });
+    const { error } = inventorySchema.validate(
+      //convert status from REQ BODY to lowerCase to pass Validation
+      { ...req.body, status: req.body.status.toUpperCase() },
+      {
+        abortEarly: false,
+      }
+    );
     if (error)
       return res.status(400).send({ message: error.details[0].message });
 
@@ -124,7 +130,7 @@ const updateInventoryByWarehouseId = async (req, res) => {
         .status(400)
         .send({ message: "Inventory not updated try again later " });
     }
-    
+
     const getNewInventory = await knex("inventories")
       .where("id", inventory_id)
       .first();
