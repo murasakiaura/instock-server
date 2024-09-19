@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const knex = require("knex")(require("../knexfile"));
+const constants = require('../constants')
 
 // POST -- Create New InveNtory of Warehouse by its ID
 const createNewInventory = async (req, res) => {
@@ -72,6 +73,30 @@ const createNewInventory = async (req, res) => {
   }
 };
 
+
+const getAllInventoryItems = async (req, res) => {
+  try {
+    const allInventoryItems = await knex(constants.knex.inventories)
+    .join("warehouses", "inventories.warehouse_id", "warehouses.id")
+      .select(
+        "inventories.id",
+        "warehouses.warehouse_name",
+        "inventories.item_name",
+        "inventories.description",
+        "inventories.category",
+        "inventories.status",
+        "inventories.quantity"
+      );
+    if (allInventoryItems.length === 0) {
+      return res.status(200).json({ message: 'Currently, inventory is empty' });
+    }
+    res.status(200).json(allInventoryItems);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch all inventory items" });
+  };
+}
+  
+  
 // PUT----Update Inventory of Warehouse by Warehouse_id and inventory_id
 const updateInventoryByWarehouseId = async (req, res) => {
   try {
@@ -141,10 +166,12 @@ const updateInventoryByWarehouseId = async (req, res) => {
     });
   } catch (error) {
     res.status(400).send(`Error updating  Inventory : ${error}`);
+
   }
 };
 
 module.exports = {
   createNewInventory,
+  getAllInventoryItems,
   updateInventoryByWarehouseId,
-};
+}
