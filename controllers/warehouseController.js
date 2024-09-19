@@ -1,5 +1,6 @@
 const Joi = require("joi");
 const knex = require("knex")(require("../knexfile"));
+const constants = require('../constants');
 
 const updateWarehouseDetails = async (req, res) => {
   try {
@@ -67,7 +68,7 @@ const updateWarehouseDetails = async (req, res) => {
 // Get all Warehouses
 const getAllWarehouses = async(req, res) => {
   try {
-    const allWarehouses = await knex("warehouses");
+    const allWarehouses = await knex(constants.knex.warehouses);
     if (allWarehouses.length === 0) {
       return res.status(200).json({ message: 'No warehouses found' });
     }
@@ -78,25 +79,10 @@ const getAllWarehouses = async(req, res) => {
 };
 
 // Get a single warehouse
-
 const getSingleWarehouse = async (req, res) => {
   const { id } = req.params;
   try {
-    const warehouse = await knex("warehouses").where({ id }).first();
-    if (!warehouse) {
-      return res.status(404).json({ error: "Warehouse not found" });
-    }
-    res.status(200).json(warehouse);
-  } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-// Get a single warehouse
-const getSingleWarehouse = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const warehouse = await knex("warehouses").where({ id }).first();
+    const warehouse = await knex(constants.knex.warehouses).where({ id }).first();
     if (!warehouse) {
       return res.status(404).json({ error: "Warehouse not found" });
     }
