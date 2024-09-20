@@ -1,14 +1,6 @@
 const Joi = require("joi");
 const knex = require("knex")(require("../knexfile"));
-
-// {
-//     "warehouse_id": 1,
-//     "item_name": "Paper Towels",
-//     "description": "Made out of military-grade synthetic materials, these paper towels are highly flammable, yet water resistant, and easy to clean.",
-//     "category": "Gear",
-//     "status": "Out of Stock",
-//     "quantity": 0
-//   }
+const constants = require('../constants')
 
 // POST -- Create New InveNtory of Warehouse by its ID
 const createNewInventory = async (req, res) => {
@@ -19,13 +11,13 @@ const createNewInventory = async (req, res) => {
       item_name: Joi.string().required(),
       description: Joi.string().required(),
       category: Joi.string().required(),
-      status: Joi.string().valid("in stock", "out of stock").required(),
-      quantity: Joi.number().integer().strict().positive().required(),
+      status: Joi.string().valid("IN STOCK", "OUT OF STOCK").required(),
+      quantity: Joi.number().integer().strict().required(),
     });
 
     const { error } = inventorySchema.validate(
       //convert status from REQ BODY to lowerCase to pass Validation
-      { ...req.body, status: req.body.status.toLowerCase() },
+      { ...req.body, status: req.body.status.toUpperCase() },
       {
         abortEarly: false,
       }
@@ -52,15 +44,14 @@ const createNewInventory = async (req, res) => {
       });
 
     // Create a new inventory item when db is ready
-    const createNewInventory = await knex("inventories")
-      .insert({
-        warehouse_id,
-        item_name,
-        description,
-        category,
-        status,
-        quantity,
-      });
+    const createNewInventory = await knex("inventories").insert({
+      warehouse_id,
+      item_name,
+      description,
+      category,
+      status,
+      quantity,
+    });
 
     if (createNewInventory.length === 0)
       return res.status(500).send({
@@ -77,13 +68,110 @@ const createNewInventory = async (req, res) => {
       message: "Inventory created successfully",
       data: newInventory,
     });
-
-
   } catch (err) {
     res.status(400).send(`Error Creating  Inventory : ${err}`);
   }
 };
 
+
+const getAllInventoryItems = async (req, res) => {
+  try {
+    const allInventoryItems = await knex(constants.knex.inventories)
+    .join("warehouses", "inventories.warehouse_id", "warehouses.id")
+      .select(
+        "inventories.id",
+        "warehouses.warehouse_name",
+        "inventories.item_name",
+        "inventories.description",
+        "inventories.category",
+        "inventories.status",
+        "inventories.quantity"
+      );
+    if (allInventoryItems.length === 0) {
+      return res.status(200).json({ message: 'Currently, inventory is empty' });
+    }
+    res.status(200).json(allInventoryItems);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch all inventory items" });
+  };
+}
+  
+  
+// PUT----Update Inventory of Warehouse by Warehouse_id and inventory_id
+const updateInventoryByWarehouseId = async (req, res) => {
+  try {
+    const { inventory_id } = req.params;
+
+    // inventorySchema for req body validations
+    const inventorySchema = Joi.object({
+      warehouse_id: Joi.number().integer().strict().positive().required(),
+      item_name: Joi.string().required(),
+      description: Joi.string().required(),
+      category: Joi.string().required(),
+      status: Joi.string().valid("IN STOCK", "OUT OF STOCK").required(),
+      quantity: Joi.number().integer().strict().required(),
+    });
+    const { error } = inventorySchema.validate(
+      //convert status from REQ BODY to lowerCase to pass Validation
+      { ...req.body, status: req.body.status.toUpperCase() },
+      {
+        abortEarly: false,
+      }
+    );
+    if (error)
+      return res.status(400).send({ message: error.details[0].message });
+
+    // check if  warehouse_id all ready exist in warehouse
+    const { warehouse_id } = req.body;
+
+    const warehouseAllReadyExist = await knex("warehouses").where(
+      "id",
+      warehouse_id
+    );
+
+    if (warehouseAllReadyExist.length === 0)
+      return res.status(400).send({
+        message:
+          "The warehouse you're trying to update inventory for  does not exist. Please add the warehouse first.",
+      });
+
+    const checkInventoryExist = await knex("inventories").where(
+      "id",
+      inventory_id
+    );
+
+    if (checkInventoryExist.length === 0)
+      return res.status(404).send({
+        message:
+          "The inventory does not exist. Please add the inventory first.",
+      });
+
+    const updateInventory = await knex("inventories")
+      .where("id", inventory_id)
+      .update(req.body);
+
+    if (updateInventory === 0) {
+      return res
+        .status(400)
+        .send({ message: "Inventory not updated try again later " });
+    }
+
+    const getNewInventory = await knex("inventories")
+      .where("id", inventory_id)
+      .first();
+
+    res.status(200).json({
+      message: "Inventory",
+      data: getNewInventory,
+    });
+  } catch (error) {
+    res.status(400).send(`Error updating  Inventory : ${error}`);
+
+  }
+};
+
 module.exports = {
   createNewInventory,
-};
+  getAllInventoryItems,
+  updateInventoryByWarehouseId,
+}

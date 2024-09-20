@@ -1,9 +1,10 @@
 const express = require("express");
+const app = express();
 const cors = require("cors");
 const inventoriesRoutes = require("./routes/inventoriesRoutes");
-const app = express();
-const port = 3000;
-const warehousesRoutes = require("./routes/warehousesRoutes");
+const warehouseRoutes = require("./routes/warehouseRoutes");
+const port = process.env.PORT || 3000;
+
 
 // Middleware
 app.use(express.json());
@@ -15,8 +16,9 @@ app.get("/", (req, res) => {
 });
 
 // Routes
-app.use("/inventories/:warehouse_id", inventoriesRoutes);
-app.use("/api/warehouses", warehousesRoutes);
+app.use("/api/inventories", inventoriesRoutes);
+app.use("/api/warehouses", warehouseRoutes);
+
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
