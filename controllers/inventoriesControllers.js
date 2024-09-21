@@ -104,7 +104,6 @@ const getWarehouseInventories = async (req, res) => {
 
   try {
     const givenWarehouse = await knex(constants.knex.warehouses).where({ id: warehouseId }).first();
-    console.log(givenWarehouse);
 
     if (!givenWarehouse) {
       return res.status(404).json({ error: 'Warehouse not found' });
