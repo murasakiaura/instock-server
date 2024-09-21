@@ -28,18 +28,16 @@ const createNewWarehouse = async (req, res) => {
       });
     }
     // check if  warehouse_id all ready exist in warehouse
-    const { warehouse_id, item_name, description, category, status, quantity } =
-      req.body;
-
-    const warehouseAllReadyExist = await knex("warehouses").where(
-      "id",
-      warehouse_id
-    );
-    if (warehouseAllReadyExist.length === 0)
-      return res.status(400).send({
-        message:
-          "The warehouse you're trying to add inventory to does exist , Please add a different warehouse first.",
-      });
+    const {
+      warehouse_name,
+      address,
+      city,
+      country,
+      contact_name,
+      contact_position,
+      contact_phone,
+      contact_email,
+    } = req.body;
 
     // Create a new warehouse item when db is ready
     const createNewWarehouse = await knex("warehouses").insert({
