@@ -1,6 +1,6 @@
 const Joi = require("joi");
 const knex = require("knex")(require("../knexfile"));
-const constants = require('../constants')
+const constants = require("../constants");
 
 // POST -- Create New InveNtory of Warehouse by its ID
 const createNewInventory = async (req, res) => {
@@ -33,7 +33,7 @@ const createNewInventory = async (req, res) => {
     const { warehouse_id, item_name, description, category, status, quantity } =
       req.body;
 
-    const warehouseAllReadyExist = await knex("warehouses").where(
+    const warehouseAllReadyExist = await knex(constants.knex.warehouses).where(
       "id",
       warehouse_id
     );
@@ -44,7 +44,7 @@ const createNewInventory = async (req, res) => {
       });
 
     // Create a new inventory item when db is ready
-    const createNewInventory = await knex("inventories").insert({
+    const createNewInventory = await knex(constants.knex.inventories).insert({
       warehouse_id,
       item_name,
       description,
@@ -60,7 +60,7 @@ const createNewInventory = async (req, res) => {
       });
 
     const [newInventoryId] = createNewInventory;
-    const newInventory = await knex("inventories")
+    const newInventory = await knex(constants.knex.inventories)
       .where({ id: newInventoryId })
       .first();
 
@@ -73,12 +73,12 @@ const createNewInventory = async (req, res) => {
   }
 };
 
-//Get all inventory items 
+//Get all inventory items
 
 const getAllInventoryItems = async (req, res) => {
   try {
     const allInventoryItems = await knex(constants.knex.inventories)
-    .join("warehouses", "inventories.warehouse_id", "warehouses.id")
+      .join("warehouses", "inventories.warehouse_id", "warehouses.id")
       .select(
         "inventories.id",
         "warehouses.warehouse_name",
@@ -89,36 +89,39 @@ const getAllInventoryItems = async (req, res) => {
         "inventories.quantity"
       );
     if (allInventoryItems.length === 0) {
-      return res.status(200).json({ message: 'Currently, inventory is empty' });
+      return res.status(200).json({ message: "Currently, inventory is empty" });
     }
     res.status(200).json(allInventoryItems);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch all inventory items" });
-  };
-}
-  
+  }
+};
+
 //GET Inventories for a Given Warehouse
 
 const getWarehouseInventories = async (req, res) => {
   const warehouseId = req.params.warehouse_id;
 
   try {
-    const givenWarehouse = await knex(constants.knex.warehouses).where({ id: warehouseId }).first();
+    const givenWarehouse = await knex(constants.knex.warehouses)
+      .where({ id: warehouseId })
+      .first();
 
     if (!givenWarehouse) {
-      return res.status(404).json({ error: 'Warehouse not found' });
+      return res.status(404).json({ error: "Warehouse not found" });
     }
 
-    const givenWarehouseInventories = await knex(constants.knex.inventories).where({ warehouse_id: warehouseId });
+    const givenWarehouseInventories = await knex(
+      constants.knex.inventories
+    ).where({ warehouse_id: warehouseId });
 
     res.status(200).json(givenWarehouseInventories);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-  
 // PUT----Update Inventory of Warehouse by Warehouse_id and inventory_id
 const updateInventoryByWarehouseId = async (req, res) => {
   try {
@@ -146,7 +149,7 @@ const updateInventoryByWarehouseId = async (req, res) => {
     // check if  warehouse_id all ready exist in warehouse
     const { warehouse_id } = req.body;
 
-    const warehouseAllReadyExist = await knex("warehouses").where(
+    const warehouseAllReadyExist = await knex(constants.knex.warehouses).where(
       "id",
       warehouse_id
     );
@@ -157,7 +160,7 @@ const updateInventoryByWarehouseId = async (req, res) => {
           "The warehouse you're trying to update inventory for  does not exist. Please add the warehouse first.",
       });
 
-    const checkInventoryExist = await knex("inventories").where(
+    const checkInventoryExist = await knex(constants.knex.inventories).where(
       "id",
       inventory_id
     );
@@ -168,7 +171,7 @@ const updateInventoryByWarehouseId = async (req, res) => {
           "The inventory does not exist. Please add the inventory first.",
       });
 
-    const updateInventory = await knex("inventories")
+    const updateInventory = await knex(constants.knex.inventories)
       .where("id", inventory_id)
       .update(req.body);
 
@@ -178,7 +181,7 @@ const updateInventoryByWarehouseId = async (req, res) => {
         .send({ message: "Inventory not updated try again later " });
     }
 
-    const getNewInventory = await knex("inventories")
+    const getNewInventory = await knex(constants.knex.inventories)
       .where("id", inventory_id)
       .first();
 
@@ -187,8 +190,33 @@ const updateInventoryByWarehouseId = async (req, res) => {
       data: getNewInventory,
     });
   } catch (error) {
-    res.status(400).send(`Error updating  Inventory : ${error}`);
+    res.status(500).send(`Error updating  Inventory : ${error}`);
+  }
+};
 
+const getInventoryById = async (req, res) => {
+  try {
+    const { inventory_id } = req.params;
+    const inventory = await knex(constants.knex.inventories)
+      .where("inventories.id", inventory_id)
+      .join("warehouses", "inventories.warehouse_id", "warehouses.id")
+      .select(
+        "inventories.id",
+        "warehouses.warehouse_name",
+        "inventories.item_name",
+        "inventories.description",
+        "inventories.category",
+        "inventories.status",
+        "inventories.quantity"
+      )
+      .first();
+
+    if (!inventory)
+      return res.status(404).send({ message: "Inventory not found" });
+
+    res.status(200).json(inventory);
+  } catch (error) {
+    res.status(500).send(`Error Getting   Inventory : ${error}`);
   }
 };
 
@@ -197,4 +225,5 @@ module.exports = {
   getAllInventoryItems,
   updateInventoryByWarehouseId,
   getWarehouseInventories,
-}
+  getInventoryById,
+};
