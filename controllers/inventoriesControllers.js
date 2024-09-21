@@ -73,6 +73,7 @@ const createNewInventory = async (req, res) => {
   }
 };
 
+//Get all inventory items 
 
 const getAllInventoryItems = async (req, res) => {
   try {
@@ -96,6 +97,27 @@ const getAllInventoryItems = async (req, res) => {
   };
 }
   
+//GET Inventories for a Given Warehouse
+
+const getWarehouseInventories = async (req, res) => {
+  const warehouseId = req.params.warehouse_id;
+
+  try {
+    const givenWarehouse = await knex(constants.knex.warehouses).where({ id: warehouseId }).first();
+
+    if (!givenWarehouse) {
+      return res.status(404).json({ error: 'Warehouse not found' });
+    }
+
+    const givenWarehouseInventories = await knex(constants.knex.inventories).where({ warehouse_id: warehouseId });
+
+    res.status(200).json(givenWarehouseInventories);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
   
 // PUT----Update Inventory of Warehouse by Warehouse_id and inventory_id
 const updateInventoryByWarehouseId = async (req, res) => {
@@ -174,4 +196,5 @@ module.exports = {
   createNewInventory,
   getAllInventoryItems,
   updateInventoryByWarehouseId,
+  getWarehouseInventories,
 }
