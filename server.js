@@ -11,7 +11,7 @@ const cors = require("cors");
 const inventoriesRoutes = require("./routes/inventoriesRoutes");
 const warehouseRoutes = require("./routes/warehouseRoutes");
 const port = process.env.PORT || 3000;
->>>>>>> 23222c399f2863fefddda719c897a996ae1d976d
+>>>>>>>>> Temporary merge branch 2
 
 // Middleware
 app.use(express.json());
