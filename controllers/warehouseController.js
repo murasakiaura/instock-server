@@ -85,9 +85,17 @@ const deleteWarehouse = async (req, res) => {
     }
 
     // Delete the warehouse with the associated inventories
-    await knex("warehouses").where("id", warehouseId).del();
 
-    return res.status(204).send({
+    const resFromDelete = await knex("warehouses")
+      .where("id", warehouseId)
+      .del();
+
+    if (!resFromDelete)
+      return res.status(204).send({
+        message: "Warehouse Deleted unsuccessfully. try again later",
+      });
+
+    return res.status(201).send({
       message: "Warehouse Deleted successfully.",
     });
   } catch (error) {
