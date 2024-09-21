@@ -91,7 +91,7 @@ const deleteWarehouse = async (req, res) => {
       .del();
 
     if (!resFromDelete)
-      return res.status(204).send({
+      return res.status(500).send({
         message: "Warehouse Deleted unsuccessfully. try again later",
       });
 
@@ -104,6 +104,7 @@ const deleteWarehouse = async (req, res) => {
     });
   }
 };
+
 
 const updateWarehouseDetails = async (req, res) => {
   try {
