@@ -47,7 +47,7 @@ const createNewWarehouse = async (req, res) => {
     if (warehouseAllReadyExist.length === 0)
       return res.status(400).send({
         message:
-          "The warehouse you're trying to add inventory to does not exist. Please add the warehouse first.",
+          "The warehouse you're trying to add inventory to does exist , Please add a different warehouse first.",
       });
 
     // Create a new warehouse item when db is ready
