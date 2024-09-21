@@ -1,6 +1,103 @@
 const Joi = require("joi");
 const knex = require("knex")(require("../knexfile"));
-const constants = require('../constants');
+const constants = require("../constants");
+
+const createNewWarehouse = async (req, res) => {
+  try {
+    const warehouseSchema = Joi.object({
+      warehouse_name: Joi.string().required(),
+      address: Joi.string().required(),
+      city: Joi.string().required(),
+      country: Joi.string().required(),
+      contact_name: Joi.string().required(),
+      contact_position: Joi.string().required(),
+      contact_phone: Joi.string()
+        .pattern(/^\+?[0-9\s-().]*$/)
+        .required(),
+      contact_email: Joi.string().email().required(),
+    });
+
+    const { error } = warehouseSchema.validate(req.body, {
+      abortEarly: false,
+    });
+
+    // Handle validation errors
+    if (error) {
+      return res.status(400).send({
+        message: error.details.map((detail) => detail.message).join(", "),
+      });
+    }
+    // check if  warehouse_id all ready exist in warehouse
+    const { warehouse_id, item_name, description, category, status, quantity } =
+      req.body;
+
+    const warehouseAllReadyExist = await knex("warehouses").where(
+      "id",
+      warehouse_id
+    );
+    if (warehouseAllReadyExist.length === 0)
+      return res.status(400).send({
+        message:
+          "The warehouse you're trying to add inventory to does exist , Please add a different warehouse first.",
+      });
+
+    // Create a new warehouse item when db is ready
+    const createNewWarehouse = await knex("warehouses").insert({
+      warehouse_name,
+      address,
+      city,
+      country,
+      contact_name,
+      contact_position,
+      contact_phone,
+      contact_email,
+    });
+
+    if (createNewWarehouse.length === 0)
+      return res.status(500).send({
+        message:
+          "Unable to create new warehouse at the moment. Please try again later.",
+      });
+
+    const [newWarehouseId] = createNewWarehouse;
+    const newWarehouse = await knex("warehouses")
+      .where({ id: newWarehouseId })
+      .first();
+
+    res.status(201).json({
+      message: "Warehouse created successfully",
+      data: newWarehouse,
+    });
+  } catch (err) {
+    res.status(400).send(`Error Creating Warehouse : ${err}`);
+  }
+};
+
+// DELETE /api/warehouses/:id
+const deleteWarehouse = async (req, res) => {
+  const warehouseId = req.params.id;
+
+  try {
+    const warehouse = await knex("warehouses").where("id", warehouseId).first();
+
+    if (!warehouse) {
+      return res.status(404).send({
+        message: "Warehouse not found",
+      });
+    }
+
+    // Delete the warehouse with the associated inventories
+    await knex("warehouses").where("id", warehouseId).del();
+
+    return res.status(204).send({
+      message: "Warehouse Deleted successfully.",
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: "Error deleting warehouse",
+    });
+  }
+};
 
 const updateWarehouseDetails = async (req, res) => {
   try {
@@ -62,15 +159,12 @@ const updateWarehouseDetails = async (req, res) => {
   }
 };
 
-
-
-
 // Get all Warehouses
-const getAllWarehouses = async(req, res) => {
+const getAllWarehouses = async (req, res) => {
   try {
     const allWarehouses = await knex(constants.knex.warehouses);
     if (allWarehouses.length === 0) {
-      return res.status(200).json({ message: 'No warehouses found' });
+      return res.status(200).json({ message: "No warehouses found" });
     }
     res.status(200).json(allWarehouses);
   } catch (error) {
@@ -82,7 +176,9 @@ const getAllWarehouses = async(req, res) => {
 const getSingleWarehouse = async (req, res) => {
   const { id } = req.params;
   try {
-    const warehouse = await knex(constants.knex.warehouses).where({ id }).first();
+    const warehouse = await knex(constants.knex.warehouses)
+      .where({ id })
+      .first();
     if (!warehouse) {
       return res.status(404).json({ error: "Warehouse not found" });
     }
@@ -96,5 +192,6 @@ module.exports = {
   updateWarehouseDetails,
   getAllWarehouses,
   getSingleWarehouse,
+  createNewWarehouse,
+  deleteWarehouse,
 };
-
