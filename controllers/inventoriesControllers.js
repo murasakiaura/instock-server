@@ -220,10 +220,35 @@ const getInventoryById = async (req, res) => {
   }
 };
 
+// DELETE /api/inventories/:id
+const deleteInventoryById = async (req, res) => {
+  const inventoryId = req.params.id;
+
+  try {
+    const resFromDelete = await knex('inventories')
+      .where('id', inventoryId)
+      .del();
+
+    if (resFromDelete === 0) {
+      return res.status(404).send({
+        message: "Inventory not found.",
+      });
+    }
+
+    return res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({
+      message: "Error deleting inventory.",
+    });
+  }
+};
+
 module.exports = {
   createNewInventory,
   getAllInventoryItems,
   updateInventoryByWarehouseId,
   getWarehouseInventories,
   getInventoryById,
+  deleteInventoryById,
 };
