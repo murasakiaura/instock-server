@@ -22,5 +22,13 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.4"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/murasakiaura/instock-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/murasakiaura/instock-server/issues"
+  },
+  "homepage": "https://github.com/murasakiaura/instock-server#readme"
 }
