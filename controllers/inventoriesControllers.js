@@ -7,12 +7,12 @@ const createNewInventory = async (req, res) => {
   try {
     // inventorySchema for req body validations
     const inventorySchema = Joi.object({
-      warehouse_id: Joi.number().integer().strict().positive().required(),
+      warehouse_id: Joi.number().integer().positive().required(),
       item_name: Joi.string().required(),
       description: Joi.string().required(),
       category: Joi.string().required(),
       status: Joi.string().valid("IN STOCK", "OUT OF STOCK").required(),
-      quantity: Joi.number().integer().strict().required(),
+      quantity: Joi.number().integer().required(),
     });
 
     const { error } = inventorySchema.validate(
